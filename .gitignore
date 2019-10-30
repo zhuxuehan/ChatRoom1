@@ -1,0 +1,12 @@
+out
+.idea
+.gradle
+# Project exclude paths
+/lib-clink/build/
+/lib-clink/build/classes/java/main/
+/sample-client/build/
+/sample-client/build/classes/java/main/
+/sample-foo/build/
+/sample-foo/build/classes/java/main/
+/sample-server/build/
+/sample-server/build/classes/java/main/
