@@ -59,6 +59,7 @@ public class TCPClient extends Connector {
         try {
             return new TCPClient(socketChannel, cachePath);
         } catch (Exception e) {
+            e.printStackTrace();
             System.out.println("连接异常");
             CloseUtils.close(socketChannel);
         }

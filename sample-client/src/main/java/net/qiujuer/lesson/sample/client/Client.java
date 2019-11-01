@@ -16,7 +16,7 @@ public class Client {
                 .ioProvider(new IoSelectorProvider())
                 .start();
 
-        ServerInfo info = UDPSearcher.searchServer(10000);
+        ServerInfo info = UDPSearcher.searchServer(300000);
         System.out.println("Server:" + info);
 
         if (info != null) {

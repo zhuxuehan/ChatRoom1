@@ -2,6 +2,8 @@ package net.qiujuer.lesson.sample.client;
 
 import net.qiujuer.lesson.sample.client.bean.ServerInfo;
 import net.qiujuer.lesson.sample.foo.Foo;
+import net.qiujuer.library.clink.core.IoContext;
+import net.qiujuer.library.clink.impl.IoSelectorProvider;
 
 import java.io.File;
 import java.io.IOException;
@@ -11,10 +13,14 @@ import java.util.List;
 public class ClientTest {
     private static boolean done;
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, InterruptedException {
         File cachePath = Foo.getCacheDir("client/test");
 
-        ServerInfo info = UDPSearcher.searchServer(10000);
+        IoContext.setup()
+                .ioProvider(new IoSelectorProvider())
+                .start();
+
+        ServerInfo info = UDPSearcher.searchServer(100000);
         System.out.println("Server:" + info);
         if (info == null) {
             return;
@@ -23,29 +29,24 @@ public class ClientTest {
         // 当前连接数量
         int size = 0;
         final List<TCPClient> tcpClients = new ArrayList<>();
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 100; i++) {
             try {
                 TCPClient tcpClient = TCPClient.startWith(info, cachePath);
                 if (tcpClient == null) {
-                    System.out.println("连接异常");
-                    continue;
+                    throw new NullPointerException();
                 }
 
                 tcpClients.add(tcpClient);
 
                 System.out.println("连接成功：" + (++size));
 
-            } catch (IOException e) {
+            } catch (IOException | NullPointerException e) {
                 System.out.println("连接异常");
+                break;
             }
 
-            try {
-                Thread.sleep(20);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
         }
-
+//        Thread.sleep(10);
 
         System.in.read();
 
@@ -55,7 +56,7 @@ public class ClientTest {
                     tcpClient.send("Hello~~");
                 }
                 try {
-                    Thread.sleep(1000);
+                    Thread.sleep(100);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -64,8 +65,7 @@ public class ClientTest {
 
         Thread thread = new Thread(runnable);
         thread.start();
-
-        System.in.read();
+        Thread.sleep(8000);
 
         // 等待线程完成
         done = true;
@@ -79,6 +79,7 @@ public class ClientTest {
         for (TCPClient tcpClient : tcpClients) {
             tcpClient.exit();
         }
+        IoContext.close();
 
     }
 
