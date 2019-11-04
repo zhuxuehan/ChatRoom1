@@ -66,7 +66,6 @@ public class AsyncPacketReader implements Closeable {
             return null;
         }
 
-
         try {
             if (currentFrame.handle(args)) {
                 // 消费完本帧
@@ -80,6 +79,8 @@ public class AsyncPacketReader implements Closeable {
                     provider.completedPacket(((SendEntityFrame) currentFrame).getPacket(),
                             true);
                 }
+
+
 
                 // 从链头弹出
                 popCurrentFrame();
@@ -143,6 +144,7 @@ public class AsyncPacketReader implements Closeable {
                 SendPacket packet = ((AbsSendPacketFrame) frame).getPacket();
                 provider.completedPacket(packet, false);
             }
+            node = node.next;
         }
 
         nodeSize = 0;

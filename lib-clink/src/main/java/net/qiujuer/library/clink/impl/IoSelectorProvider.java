@@ -199,7 +199,7 @@ public class IoSelectorProvider implements IoProvider {
             } catch (ClosedChannelException
                     | CancelledKeyException
                     | ClosedSelectorException e) {
-                e.printStackTrace();
+//                e.printStackTrace();
                 return null;
             } finally {
                 // 解除锁定状态

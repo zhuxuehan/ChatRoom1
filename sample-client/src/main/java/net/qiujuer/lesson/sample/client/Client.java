@@ -17,6 +17,8 @@ public class Client {
                 .start();
 
         ServerInfo info = UDPSearcher.searchServer(300000);
+//        ServerInfo info = new ServerInfo(30201,"127.0.0.1",  "sdfsdf");
+
         System.out.println("Server:" + info);
 
         if (info != null) {

@@ -58,7 +58,7 @@ public class SocketChannelAdapter implements Sender, Receiver, Cloneable {
     }
 
     @Override
-    public void close() throws IOException {
+    public void close() {
         if (isClosed.compareAndSet(false, true)) {
             // 解除注册回调
             ioProvider.unRegisterInput(channel);
