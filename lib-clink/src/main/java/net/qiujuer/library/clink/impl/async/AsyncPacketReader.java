@@ -76,6 +76,7 @@ public class AsyncPacketReader implements Closeable {
                 } else if (currentFrame instanceof SendEntityFrame) {
                     // 末尾实体帧
                     // 通知完成
+//                    System.out.println("消费完成");
                     provider.completedPacket(((SendEntityFrame) currentFrame).getPacket(),
                             true);
                 }

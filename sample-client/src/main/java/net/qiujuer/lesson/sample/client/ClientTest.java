@@ -29,7 +29,7 @@ public class ClientTest {
         // 当前连接数量
         int size = 0;
         final List<TCPClient> tcpClients = new ArrayList<>();
-        for (int i = 0; i < 280; i++) {
+        for (int i = 0; i < 50; i++) {
             try {
                 TCPClient tcpClient = TCPClient.startWith(info, cachePath);
                 if (tcpClient == null) {
@@ -51,17 +51,16 @@ public class ClientTest {
         System.in.read();
 
         Runnable runnable = () -> {
-            while (!done) {
+//            while (!done) {
                 for (TCPClient tcpClient : tcpClients) {
-                    tcpClient.send("Hello~~Hello~~Hello~~Hello~~Hello~~Hello~~Hello~~");
-                    tcpClient.send("Hello~~Hello~~Hello~~Hello~~Hello~~Hello~~Hello~~");
+                    tcpClient.send("Hello~~");
                 }
                 try {
                     Thread.sleep(100);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-            }
+//            }
         };
 
         Thread thread = new Thread(runnable);

@@ -170,4 +170,17 @@ public class TCPServer implements ClientHandler.ClientHandlerCallback {
             selector.wakeup();
         }
     }
+
+    /**
+     * 获取当前的状态信息
+     */
+    Object[] getStatusString() {
+//        return new String[]{
+//                "客户端数量：" + connectorHandlerList.size(),
+//                "发送数量：" + statistics.sendSize,
+//                "接收数量：" + statistics.receiveSize
+//        };
+        return null;
+    }
+
 }

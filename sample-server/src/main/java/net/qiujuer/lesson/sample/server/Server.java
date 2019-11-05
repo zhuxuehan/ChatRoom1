@@ -1,6 +1,7 @@
 package net.qiujuer.lesson.sample.server;
 
 import net.qiujuer.lesson.sample.foo.Foo;
+import net.qiujuer.lesson.sample.foo.FooGui;
 import net.qiujuer.lesson.sample.foo.constants.TCPConstants;
 import net.qiujuer.library.clink.core.IoContext;
 import net.qiujuer.library.clink.impl.IoSelectorProvider;
@@ -26,6 +27,9 @@ public class Server {
         }
 
         UDPProvider.start(TCPConstants.PORT_SERVER);
+
+//        FooGui gui = new FooGui("Clink-Server", tcpServer::getStatusString);
+//        gui.doShow();
 
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
         String str;

@@ -35,9 +35,9 @@ public class IoSelectorProvider implements IoProvider {
         readSelector = Selector.open();
         writeSelector = Selector.open();
 
-        inputHandlePool = Executors.newFixedThreadPool(4,
+        inputHandlePool = Executors.newFixedThreadPool(10,
                 new IoProviderThreadFactory("IoProvider-Input-Thread-"));
-        outputHandlePool = Executors.newFixedThreadPool(4,
+        outputHandlePool = Executors.newFixedThreadPool(10,
                 new IoProviderThreadFactory("IoProvider-Output-Thread-"));
 
         // 开始输出输入的监听
