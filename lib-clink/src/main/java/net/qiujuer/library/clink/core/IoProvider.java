@@ -4,31 +4,30 @@ import java.io.Closeable;
 import java.nio.channels.SocketChannel;
 
 public interface IoProvider extends Closeable {
-    boolean registerInput(SocketChannel channel, HandleInputCallback callback);
+    boolean registerInput(SocketChannel channel, HandleProviderCallback callback);
 
-    boolean registerOutput(SocketChannel channel, HandleOutputCallback callback);
+    boolean registerOutput(SocketChannel channel, HandleProviderCallback callback);
 
     void unRegisterInput(SocketChannel channel);
 
     void unRegisterOutput(SocketChannel channel);
 
-    abstract class HandleInputCallback implements Runnable {
-        @Override
-        public final void run() {
-            canProviderInput();
-        }
 
-        protected abstract void canProviderInput();
-    }
-
-    abstract class HandleOutputCallback implements Runnable {
+    abstract class HandleProviderCallback implements Runnable {
+        protected volatile IoArgs attach;
 
         @Override
         public final void run() {
-            canProviderOutput();
+            onProviderIo(attach);
         }
 
-        protected abstract void canProviderOutput();
+        protected abstract void onProviderIo(IoArgs args);
+
+        public void checkAttachNull(){
+            if (attach != null) {
+                throw new IllegalStateException("current attach is not empty");
+            }
+        }
     }
 
 }

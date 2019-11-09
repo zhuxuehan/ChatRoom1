@@ -67,18 +67,16 @@ public class IoArgs {
      * 从SocketChannel读取数据
      */
     public int readFrom(SocketChannel channel) throws IOException {
-        startWriting();
-
+        int len;
         int bytesProduced = 0;
-        while (buffer.hasRemaining()) {
-            int len = channel.read(buffer);
+        ByteBuffer buffer = this.buffer;
+        do {
+            len = channel.read(buffer);
             if (len < 0) {
-                throw new EOFException();
+                throw new EOFException("Current read any data with channel" + channel);
             }
             bytesProduced += len;
-        }
-
-        finishWriting();
+        } while (buffer.hasRemaining() && len != 0);
         return bytesProduced;
     }
 
@@ -86,14 +84,16 @@ public class IoArgs {
      * 写数据到SocketChannel
      */
     public int writeTo(SocketChannel channel) throws IOException {
+        ByteBuffer buffer = this.buffer;
+        int len;
         int bytesProduced = 0;
-        while (buffer.hasRemaining()) {
-            int len = channel.write(buffer);
+        do {
+            len = channel.write(buffer);
             if (len < 0) {
-                throw new EOFException();
+                throw new EOFException("Current write any data with channel" + channel);
             }
             bytesProduced += len;
-        }
+        } while (buffer.hasRemaining() && len != 0);
         return bytesProduced;
     }
 

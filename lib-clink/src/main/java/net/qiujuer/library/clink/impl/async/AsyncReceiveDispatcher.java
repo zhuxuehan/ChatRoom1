@@ -78,7 +78,9 @@ public class AsyncReceiveDispatcher implements ReceiveDispatcher,
      */
     @Override
     public IoArgs provideIoArgs() {
-        return writer.takeIoArgs();
+        IoArgs ioArgs = writer.takeIoArgs();
+        ioArgs.startWriting();
+        return ioArgs;
     }
 
     /**
@@ -103,6 +105,7 @@ public class AsyncReceiveDispatcher implements ReceiveDispatcher,
         if (isClosed.get()) {
             return ;
         }
+        args.finishWriting();
         do {
             writer.consumeIoArgs(args);
         } while (args.remained() && !isClosed.get());

@@ -61,7 +61,7 @@ public class AsyncPacketReader implements Closeable {
      * @return 如果当前有可用于发送的帧，则填充数据并返回，如果填充失败可返回null
      */
     IoArgs fillData() {
-        Frame currentFrame = gerCurrentFrame();
+        Frame currentFrame = getCurrentFrame();
         if (currentFrame == null) {
             return null;
         }
@@ -80,8 +80,6 @@ public class AsyncPacketReader implements Closeable {
                     provider.completedPacket(((SendEntityFrame) currentFrame).getPacket(),
                             true);
                 }
-
-
 
                 // 从链头弹出
                 popCurrentFrame();
@@ -173,7 +171,7 @@ public class AsyncPacketReader implements Closeable {
      *
      * @return Frame
      */
-    private synchronized Frame gerCurrentFrame() {
+    private synchronized Frame getCurrentFrame() {
         if (node == null) {
             return null;
         }

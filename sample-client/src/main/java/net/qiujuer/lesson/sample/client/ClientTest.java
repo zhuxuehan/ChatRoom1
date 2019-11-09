@@ -51,7 +51,8 @@ public class ClientTest {
         System.in.read();
 
         Runnable runnable = () -> {
-//            while (!done) {
+            int i = 3;
+            while (!done) {
                 for (TCPClient tcpClient : tcpClients) {
                     tcpClient.send("Hello~~");
                 }
@@ -60,7 +61,8 @@ public class ClientTest {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-//            }
+                i--;
+            }
         };
 
         Thread thread = new Thread(runnable);
@@ -77,9 +79,9 @@ public class ClientTest {
         }
 //        thread.sleep(10000);
         // 客户端结束操作
-        for (TCPClient tcpClient : tcpClients) {
-            tcpClient.exit();
-        }
+//        for (TCPClient tcpClient : tcpClients) {
+//            tcpClient.exit();
+//        }
 //        for (int i = 0; i < tcpClients.size() / 2; i++) {
 //            tcpClients.get(i).exit();
 //        }

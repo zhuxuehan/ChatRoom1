@@ -35,9 +35,9 @@ public class IoSelectorProvider implements IoProvider {
         readSelector = Selector.open();
         writeSelector = Selector.open();
 
-        inputHandlePool = Executors.newFixedThreadPool(10,
+        inputHandlePool = Executors.newFixedThreadPool(4,
                 new IoProviderThreadFactory("IoProvider-Input-Thread-"));
-        outputHandlePool = Executors.newFixedThreadPool(10,
+        outputHandlePool = Executors.newFixedThreadPool(4,
                 new IoProviderThreadFactory("IoProvider-Output-Thread-"));
 
         // 开始输出输入的监听
@@ -119,13 +119,13 @@ public class IoSelectorProvider implements IoProvider {
 
 
     @Override
-    public boolean registerInput(SocketChannel channel, HandleInputCallback callback) {
+    public boolean registerInput(SocketChannel channel, HandleProviderCallback callback) {
         return registerSelection(channel, readSelector, SelectionKey.OP_READ, inRegInput,
                 inputCallbackMap, callback) != null;
     }
 
     @Override
-    public boolean registerOutput(SocketChannel channel, HandleOutputCallback callback) {
+    public boolean registerOutput(SocketChannel channel, HandleProviderCallback callback) {
         return registerSelection(channel, writeSelector, SelectionKey.OP_WRITE, inRegOutput,
                 outputCallbackMap, callback) != null;
     }

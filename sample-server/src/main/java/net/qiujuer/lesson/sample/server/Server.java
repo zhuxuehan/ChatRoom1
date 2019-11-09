@@ -28,8 +28,8 @@ public class Server {
 
         UDPProvider.start(TCPConstants.PORT_SERVER);
 
-//        FooGui gui = new FooGui("Clink-Server", tcpServer::getStatusString);
-//        gui.doShow();
+        FooGui gui = new FooGui("Clink-Server", tcpServer::getStatusString);
+        gui.doShow();
 
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
         String str;
@@ -46,5 +46,6 @@ public class Server {
         tcpServer.stop();
 
         IoContext.close();
+        gui.doDismiss();
     }
 }

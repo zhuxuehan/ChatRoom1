@@ -23,7 +23,7 @@ public abstract class Connector implements Closeable, SocketChannelAdapter.OnCha
     private ReceiveDispatcher receiveDispatcher;
 
 
-    public void setup(SocketChannel socketChannel) throws IOException {
+    public void  setup(SocketChannel socketChannel) throws IOException {
         this.channel = socketChannel;
 
         IoContext context = IoContext.get();

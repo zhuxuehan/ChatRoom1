@@ -25,6 +25,9 @@ public class TCPServer implements ClientHandler.ClientHandlerCallback {
     private Selector selector;
     private ServerSocketChannel server;
 
+    private long receiveSize;
+    private long sendSize;
+
     public TCPServer(int port, File cachePath) {
         this.port = port;
         this.cachePath = cachePath;
@@ -82,6 +85,8 @@ public class TCPServer implements ClientHandler.ClientHandlerCallback {
         for (ClientHandler clientHandler : clientHandlerList) {
             clientHandler.send(str);
         }
+        //发送数量增加
+        sendSize += clientHandlerList.size();
     }
 
     @Override
@@ -91,6 +96,9 @@ public class TCPServer implements ClientHandler.ClientHandlerCallback {
 
     @Override
     public void onNewMessageArrived(final ClientHandler handler, final String msg) {
+        //接收数量
+        receiveSize++;
+
         // 异步提交转发任务
         forwardingThreadPoolExecutor.execute(() -> {
             synchronized (TCPServer.this) {
@@ -101,6 +109,8 @@ public class TCPServer implements ClientHandler.ClientHandlerCallback {
                     }
                     // 对其他客户端发送消息
                     clientHandler.send(msg);
+                    //发送数量+1
+                    sendSize++;
                 }
             }
         });
@@ -175,12 +185,11 @@ public class TCPServer implements ClientHandler.ClientHandlerCallback {
      * 获取当前的状态信息
      */
     Object[] getStatusString() {
-//        return new String[]{
-//                "客户端数量：" + connectorHandlerList.size(),
-//                "发送数量：" + statistics.sendSize,
-//                "接收数量：" + statistics.receiveSize
-//        };
-        return null;
+        return new String[]{
+                "客户端数量：" + clientHandlerList.size(),
+                "发送数量：" + sendSize,
+                "接收数量：" + receiveSize
+        };
     }
 
 }
