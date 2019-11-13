@@ -35,7 +35,7 @@ public class Server {
         String str;
         do {
             str = bufferedReader.readLine();
-            if ("00bye00".equalsIgnoreCase(str)) {
+            if (Foo.COMMAND_EXIT.equalsIgnoreCase(str)) {
                 break;
             }
             // 发送字符串

@@ -7,6 +7,7 @@ import net.qiujuer.library.clink.box.StringSendPacket;
 import net.qiujuer.library.clink.impl.SocketChannelAdapter;
 import net.qiujuer.library.clink.impl.async.AsyncReceiveDispatcher;
 import net.qiujuer.library.clink.impl.async.AsyncSendDispatcher;
+import net.qiujuer.library.clink.utils.CloseUtils;
 
 import java.io.Closeable;
 import java.io.File;
@@ -23,7 +24,7 @@ public abstract class Connector implements Closeable, SocketChannelAdapter.OnCha
     private ReceiveDispatcher receiveDispatcher;
 
 
-    public void  setup(SocketChannel socketChannel) throws IOException {
+    public void setup(SocketChannel socketChannel) throws IOException {
         this.channel = socketChannel;
 
         IoContext context = IoContext.get();
@@ -60,7 +61,7 @@ public abstract class Connector implements Closeable, SocketChannelAdapter.OnCha
 
     @Override
     public void onChannelClosed(SocketChannel channel) {
-
+        CloseUtils.close(this);
     }
 
 
@@ -93,4 +94,7 @@ public abstract class Connector implements Closeable, SocketChannelAdapter.OnCha
     };
 
 
+    public UUID getKey() {
+        return key;
+    }
 }
