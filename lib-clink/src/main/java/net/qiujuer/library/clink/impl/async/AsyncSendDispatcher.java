@@ -40,6 +40,16 @@ public class AsyncSendDispatcher implements SendDispatcher,
         requestSend();
     }
 
+    @Override
+    public void sendHeartbeat() {
+        if (queue.size()>0) {
+            return;
+        }
+        if (reader.requestSendHeartbeatFrame()) {
+            requestSend();
+        }
+    }
+
     /**
      * 取消Packet操作
      * 如果还在队列中，代表Packet未进行发送，则直接标志取消，并返回即可

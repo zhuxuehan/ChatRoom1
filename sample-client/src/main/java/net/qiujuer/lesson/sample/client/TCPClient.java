@@ -2,10 +2,9 @@ package net.qiujuer.lesson.sample.client;
 
 
 import net.qiujuer.lesson.sample.client.bean.ServerInfo;
-import net.qiujuer.lesson.sample.foo.Foo;
-import net.qiujuer.library.clink.core.Connector;
-import net.qiujuer.library.clink.core.Packet;
-import net.qiujuer.library.clink.core.ReceivePacket;
+import net.qiujuer.lesson.sample.foo.handle.ConnectorHandler;
+import net.qiujuer.lesson.sample.foo.handle.ConnectorStringPacketChain;
+import net.qiujuer.library.clink.box.StringReceivePacket;
 import net.qiujuer.library.clink.utils.CloseUtils;
 
 import java.io.File;
@@ -14,39 +13,24 @@ import java.net.Inet4Address;
 import java.net.InetSocketAddress;
 import java.nio.channels.SocketChannel;
 
-public class TCPClient extends Connector {
-    private final File cachePath;
+public class TCPClient extends ConnectorHandler {
 
     public TCPClient(SocketChannel socketChannel, File cachePath) throws IOException {
-        this.cachePath = cachePath;
-        setup(socketChannel);
+        super(socketChannel, cachePath);
+        getStringPacketChain().appendLast(new PrintStringPacketChain());
     }
 
-    public void exit() {
-        CloseUtils.close(this);
-    }
+    private class PrintStringPacketChain extends ConnectorStringPacketChain {
 
-    @Override
-    public void onChannelClosed(SocketChannel channel) {
-        super.onChannelClosed(channel);
-        System.out.println("连接已关闭，无法读取数据!");
-    }
-
-    @Override
-    protected File createNewReceiveFile() {
-        return Foo.createRandomTemp(cachePath);
-    }
-
-    @Override
-    protected void onReceivedPacket(ReceivePacket packet) {
-        super.onReceivedPacket(packet);
-        if (packet.type() == Packet.TYPE_MEMORY_STRING) {
-            String string = (String) packet.entity();
-            System.out.println(string);
+        @Override
+        protected boolean consume(ConnectorHandler handler, StringReceivePacket stringReceivePacket) {
+            String str = stringReceivePacket.entity();
+            System.out.println(str);
+            return true;
         }
     }
 
-    public static TCPClient startWith(ServerInfo info, File cachePath) throws IOException {
+    static TCPClient startWith(ServerInfo info, File cachePath) throws IOException {
         SocketChannel socketChannel = SocketChannel.open();
 
         // 连接本地，端口2000；超时时间3000ms

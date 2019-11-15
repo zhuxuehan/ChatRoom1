@@ -1,4 +1,4 @@
-package net.qiujuer.lesson.sample.server.handle;
+package net.qiujuer.lesson.sample.foo.handle;
 
 import net.qiujuer.library.clink.box.StringReceivePacket;
 
@@ -7,7 +7,7 @@ import net.qiujuer.library.clink.box.StringReceivePacket;
  */
 class DefaultNonConnectorStringPacketChain extends ConnectorStringPacketChain {
     @Override
-    protected boolean consume(ClientHandler handler, StringReceivePacket packet) {
+    protected boolean consume(ConnectorHandler handler, StringReceivePacket packet) {
         return false;
     }
 }

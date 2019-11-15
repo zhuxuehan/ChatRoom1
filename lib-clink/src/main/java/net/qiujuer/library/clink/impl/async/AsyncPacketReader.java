@@ -4,10 +4,7 @@ import net.qiujuer.library.clink.core.Frame;
 import net.qiujuer.library.clink.core.IoArgs;
 import net.qiujuer.library.clink.core.SendPacket;
 import net.qiujuer.library.clink.core.ds.BytePriorityNode;
-import net.qiujuer.library.clink.frames.AbsSendPacketFrame;
-import net.qiujuer.library.clink.frames.CancelSendFrame;
-import net.qiujuer.library.clink.frames.SendEntityFrame;
-import net.qiujuer.library.clink.frames.SendHeaderFrame;
+import net.qiujuer.library.clink.frames.*;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -54,13 +51,27 @@ public class AsyncPacketReader implements Closeable {
         }
     }
 
+    boolean requestSendHeartbeatFrame() {
+        synchronized (this) {
+            for (BytePriorityNode<Frame> x = node; x != null; x = x.next) {
+                Frame frame = x.item;
+                if (frame.getBodyType() == Frame.TYPE_COMMAND_HEARTBEAT) {
+                    return false;
+                }
+            }
+            appendNewFrame(new HeartbeatSendFrame());
+            return true;
+        }
+
+    }
+
 
     /**
      * 填充数据到IoArgs中
      *
      * @return 如果当前有可用于发送的帧，则填充数据并返回，如果填充失败可返回null
      */
-    IoArgs fillData() {
+    IoArgs  fillData() {
         Frame currentFrame = getCurrentFrame();
         if (currentFrame == null) {
             return null;

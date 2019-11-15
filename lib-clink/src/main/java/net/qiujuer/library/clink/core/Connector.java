@@ -13,6 +13,8 @@ import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.nio.channels.SocketChannel;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 public abstract class Connector implements Closeable, SocketChannelAdapter.OnChannelStatusChangedListener {
@@ -22,6 +24,7 @@ public abstract class Connector implements Closeable, SocketChannelAdapter.OnCha
     private Receiver receiver;
     private SendDispatcher sendDispatcher;
     private ReceiveDispatcher receiveDispatcher;
+    private final List<ScheduleJob> scheduleJobs = new ArrayList<>(4);
 
 
     public void setup(SocketChannel socketChannel) throws IOException {
@@ -50,6 +53,10 @@ public abstract class Connector implements Closeable, SocketChannelAdapter.OnCha
         sendDispatcher.send(packet);
     }
 
+    public long getLastActiveTime() {
+        return Math.max(sender.getLastWriteTime(), receiver.getLastReadTime());
+    }
+
     @Override
     public void close() throws IOException {
         receiveDispatcher.close();
@@ -61,6 +68,10 @@ public abstract class Connector implements Closeable, SocketChannelAdapter.OnCha
 
     @Override
     public void onChannelClosed(SocketChannel channel) {
+        synchronized (scheduleJobs) {
+            scheduleJobs.forEach(job -> job.unSchedule());
+            scheduleJobs.clear();
+        }
         CloseUtils.close(this);
     }
 
@@ -91,10 +102,33 @@ public abstract class Connector implements Closeable, SocketChannelAdapter.OnCha
         public void onReceivePacketCompleted(ReceivePacket packet) {
             onReceivedPacket(packet);
         }
+
+        @Override
+        public void onReceiveHeartbeat() {
+            System.out.println(key.toString() + ":[Heartbeat]");
+        }
     };
 
 
     public UUID getKey() {
         return key;
+    }
+
+    public void fireIdleTimeoutEvent() {
+        sendDispatcher.sendHeartbeat();
+    }
+
+    public void fireExceptionCaught(Throwable throwable) {
+    }
+
+    public void schedule(ScheduleJob job) {
+        synchronized (scheduleJobs) {
+            if (scheduleJobs.contains(job)) {
+                return;
+            }
+            Scheduler scheduler = IoContext.get().getScheduler();
+            job.schedule(scheduler);
+            scheduleJobs.add(job);
+        }
     }
 }

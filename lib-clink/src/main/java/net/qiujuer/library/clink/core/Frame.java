@@ -20,6 +20,8 @@ public abstract class Frame {
     public static final byte TYPE_COMMAND_SEND_CANCEL = 41;
     // 指令-接受拒绝
     public static final byte TYPE_COMMAND_RECEIVE_REJECT = 42;
+    // 指令-心跳包
+    public static final byte TYPE_COMMAND_HEARTBEAT = 81;
 
     // Flag标记
     public static final byte FLAG_NONE = 0;

@@ -131,4 +131,9 @@ public class AsyncReceiveDispatcher implements ReceiveDispatcher,
         CloseUtils.close(packet);
         callback.onReceivePacketCompleted(packet);
     }
+
+    @Override
+    public void onReceivedHeartbeat() {
+        callback.onReceiveHeartbeat();
+    }
 }

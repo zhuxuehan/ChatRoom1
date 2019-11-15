@@ -1,4 +1,4 @@
-package net.qiujuer.lesson.sample.server.handle;
+package net.qiujuer.lesson.sample.foo.handle;
 
 import net.qiujuer.library.clink.core.Connector;
 
@@ -8,7 +8,7 @@ import net.qiujuer.library.clink.core.Connector;
 class DefaultPrintConnectorCloseChain extends ConnectorCloseChain {
 
     @Override
-    protected boolean consume(ClientHandler handler, Connector connector) {
+    protected boolean consume(ConnectorHandler handler, Connector connector) {
         System.out.println(handler.getClientInfo() + ":Exit!!, Key:" + handler.getKey().toString());
         return false;
     }

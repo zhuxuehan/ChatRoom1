@@ -35,10 +35,10 @@ public class IoSelectorProvider implements IoProvider {
         readSelector = Selector.open();
         writeSelector = Selector.open();
 
-        inputHandlePool = Executors.newFixedThreadPool(4,
-                new IoProviderThreadFactory("IoProvider-Input-Thread-"));
-        outputHandlePool = Executors.newFixedThreadPool(4,
-                new IoProviderThreadFactory("IoProvider-Output-Thread-"));
+        inputHandlePool = Executors.newFixedThreadPool(2,
+                new NameableThreadFactory("IoProvider-Input-Thread-"));
+        outputHandlePool = Executors.newFixedThreadPool(2,
+                new NameableThreadFactory("IoProvider-Output-Thread-"));
 
         // 开始输出输入的监听
         startRead();
@@ -265,30 +265,6 @@ public class IoSelectorProvider implements IoProvider {
         }
     }
 
-
-    static class IoProviderThreadFactory implements ThreadFactory {
-        private final ThreadGroup group;
-        private final AtomicInteger threadNumber = new AtomicInteger(1);
-        private final String namePrefix;
-
-        IoProviderThreadFactory(String namePrefix) {
-            SecurityManager s = System.getSecurityManager();
-            this.group = (s != null) ? s.getThreadGroup() :
-                    Thread.currentThread().getThreadGroup();
-            this.namePrefix = namePrefix;
-        }
-
-        public Thread newThread(Runnable r) {
-            Thread t = new Thread(group, r,
-                    namePrefix + threadNumber.getAndIncrement(),
-                    0);
-            if (t.isDaemon())
-                t.setDaemon(false);
-            if (t.getPriority() != Thread.NORM_PRIORITY)
-                t.setPriority(Thread.NORM_PRIORITY);
-            return t;
-        }
-    }
 
     public static void main(String[] args) {
 //        String str = "16";

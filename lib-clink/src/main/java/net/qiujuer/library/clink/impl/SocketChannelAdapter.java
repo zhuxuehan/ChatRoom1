@@ -19,6 +19,9 @@ public class SocketChannelAdapter implements Sender, Receiver, Cloneable {
     private IoArgs.IoArgsEventProcessor receiveIoEventProcessor;
     private IoArgs.IoArgsEventProcessor sendIoEventProcessor;
 
+    private volatile long lastReadTime = System.currentTimeMillis();
+    private volatile long lastWriteTime = System.currentTimeMillis();
+
     public SocketChannelAdapter(SocketChannel channel, IoProvider ioProvider,
                                 OnChannelStatusChangedListener listener) throws IOException {
         this.channel = channel;
@@ -48,6 +51,11 @@ public class SocketChannelAdapter implements Sender, Receiver, Cloneable {
         return ioProvider.registerInput(channel, inputCallback);
     }
 
+    @Override
+    public long getLastReadTime() {
+        return lastReadTime;
+    }
+
 
     @Override
     public boolean postSendAsync() throws IOException {
@@ -57,6 +65,11 @@ public class SocketChannelAdapter implements Sender, Receiver, Cloneable {
         outputCallback.checkAttachNull();
         // 当前发送的数据附加到回调中
         return ioProvider.registerOutput(channel, outputCallback);
+    }
+
+    @Override
+    public long getLastWriteTime() {
+        return lastWriteTime;
     }
 
     @Override
@@ -78,6 +91,9 @@ public class SocketChannelAdapter implements Sender, Receiver, Cloneable {
             if (isClosed.get()) {
                 return;
             }
+
+            lastReadTime = System.currentTimeMillis();
+
             IoArgs.IoArgsEventProcessor processor = receiveIoEventProcessor;
             if (args == null) {
                 args = processor.provideIoArgs();
@@ -114,6 +130,8 @@ public class SocketChannelAdapter implements Sender, Receiver, Cloneable {
             if (isClosed.get()) {
                 return;
             }
+
+            lastWriteTime = System.currentTimeMillis();
 
             IoArgs.IoArgsEventProcessor processor = sendIoEventProcessor;
             if (args == null) {

@@ -1,4 +1,4 @@
-package net.qiujuer.lesson.sample.server.handle;
+package net.qiujuer.lesson.sample.foo.handle;
 
 import net.qiujuer.library.clink.core.Connector;
 

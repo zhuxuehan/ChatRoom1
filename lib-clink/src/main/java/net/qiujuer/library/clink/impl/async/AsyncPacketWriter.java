@@ -106,6 +106,9 @@ class AsyncPacketWriter implements Closeable {
         if (frame instanceof CancelReceiveFrame) {
             cancelReceivePacket(frame.getBodyIdentifier());
             return null;
+        } else if (frame instanceof HeartbeatReceiveFrame) {
+            provider.onReceivedHeartbeat();
+            return null;
         } else if (frame instanceof ReceiveEntityFrame) {
             WritableByteChannel channel = getPacketChannel(frame.getBodyIdentifier());
             ((ReceiveEntityFrame) frame).bindPacketChannel(channel);
@@ -212,6 +215,8 @@ class AsyncPacketWriter implements Closeable {
          * @param isSucceed 是否成功接收完成
          */
         void completedPacket(ReceivePacket packet, boolean isSucceed);
+
+        void onReceivedHeartbeat();
     }
 
     /**
