@@ -157,11 +157,10 @@ public class AsyncSendDispatcher implements SendDispatcher,
     /**
      * 网络发送IoArgs出现异常
      *
-     * @param args IoArgs
      * @param e    异常信息
      */
     @Override
-    public void onConsumeFailed(IoArgs args, Exception e) {
+    public void onConsumeFailed(Exception e) {
         e.printStackTrace();
         synchronized (isSending) {
             isSending.set(false);

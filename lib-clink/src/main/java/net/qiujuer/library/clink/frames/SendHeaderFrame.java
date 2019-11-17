@@ -2,6 +2,7 @@ package net.qiujuer.library.clink.frames;
 
 import net.qiujuer.library.clink.core.Frame;
 import net.qiujuer.library.clink.core.IoArgs;
+import net.qiujuer.library.clink.core.Packet;
 import net.qiujuer.library.clink.core.SendPacket;
 
 import java.io.IOException;
@@ -55,9 +56,15 @@ public class SendHeaderFrame extends AbsSendPacketFrame {
 
     @Override
     public Frame buildNextFrame() {
-        InputStream stream = packet.open();
-        ReadableByteChannel channel = Channels.newChannel(stream);
-        return new SendEntityFrame(getBodyIdentifier(),
-                packet.length(), channel, packet);
+        byte type = packet.type();
+        if (type == Packet.TYPE_STREAM_DIRECT) {
+            //直流类型
+            return SendDirectEntityFrame.buildEntityFrame(packet, getBodyIdentifier());
+        } else {
+            InputStream stream = packet.open();
+            ReadableByteChannel channel = Channels.newChannel(stream);
+            return new SendEntityFrame(getBodyIdentifier(),
+                    packet.length(), channel, packet);
+        }
     }
 }

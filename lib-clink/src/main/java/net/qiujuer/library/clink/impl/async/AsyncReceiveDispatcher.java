@@ -86,11 +86,10 @@ public class AsyncReceiveDispatcher implements ReceiveDispatcher,
     /**
      * 接收数据失败
      *
-     * @param args IoArgs
      * @param e    异常信息
      */
     @Override
-    public void onConsumeFailed(IoArgs args, Exception e) {
+    public void onConsumeFailed(Exception e) {
         e.printStackTrace();
     }
 
@@ -103,7 +102,7 @@ public class AsyncReceiveDispatcher implements ReceiveDispatcher,
     public void onConsumeCompleted(IoArgs args) {
         // 有数据则重复消费
         if (isClosed.get()) {
-            return ;
+            return;
         }
         args.finishWriting();
         do {
@@ -117,7 +116,7 @@ public class AsyncReceiveDispatcher implements ReceiveDispatcher,
      */
     @Override
     public ReceivePacket takePacket(byte type, long length, byte[] headerInfo) {
-        return callback.onArrivedNewPacket(type, length);
+        return callback.onArrivedNewPacket(type, length, headerInfo);
     }
 
     /**

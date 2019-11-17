@@ -1,17 +1,16 @@
 package net.qiujuer.library.clink.core;
 
-import net.qiujuer.library.clink.box.BytesReceivePacket;
-import net.qiujuer.library.clink.box.FileReceivePacket;
-import net.qiujuer.library.clink.box.StringReceivePacket;
-import net.qiujuer.library.clink.box.StringSendPacket;
+import net.qiujuer.library.clink.box.*;
 import net.qiujuer.library.clink.impl.SocketChannelAdapter;
 import net.qiujuer.library.clink.impl.async.AsyncReceiveDispatcher;
 import net.qiujuer.library.clink.impl.async.AsyncSendDispatcher;
+import net.qiujuer.library.clink.impl.bridge.BridgeSocketDispatcher;
 import net.qiujuer.library.clink.utils.CloseUtils;
 
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
 import java.util.List;
@@ -53,6 +52,37 @@ public abstract class Connector implements Closeable, SocketChannelAdapter.OnCha
         sendDispatcher.send(packet);
     }
 
+    public void changeToBridge(){
+        if(receiveDispatcher instanceof BridgeSocketDispatcher){
+            return;
+        }
+        receiveDispatcher.stop();
+        BridgeSocketDispatcher dispatcher = new BridgeSocketDispatcher(receiver);
+        receiveDispatcher = dispatcher;
+        dispatcher.start();
+    }
+
+    public void bindToBridge(Sender sender){
+        if(this.sender == sender){
+            throw new UnsupportedOperationException("Can not set current connector sender");
+        }
+        if(!(receiveDispatcher instanceof BridgeSocketDispatcher)){
+            throw new IllegalStateException("receiveDispatcher isn't bridgeSocketDispatcher");
+        }
+        ((BridgeSocketDispatcher) receiveDispatcher).bindSender(sender);
+    }
+
+    public void unBindToBridge(){
+        if(!(receiveDispatcher instanceof BridgeSocketDispatcher)){
+            throw new IllegalStateException("receiveDispatcher isn't bridgeSocketDispatcher");
+        }
+        ((BridgeSocketDispatcher) receiveDispatcher).bindSender(null);
+    }
+
+    public Sender getSender() {
+        return sender;
+    }
+
     public long getLastActiveTime() {
         return Math.max(sender.getLastWriteTime(), receiver.getLastReadTime());
     }
@@ -75,24 +105,48 @@ public abstract class Connector implements Closeable, SocketChannelAdapter.OnCha
         CloseUtils.close(this);
     }
 
-
+    /**
+     * 当一个包完全接收完成的时候回调
+     *
+     * @param packet Packet
+     */
     protected void onReceivedPacket(ReceivePacket packet) {
     }
 
-    protected abstract File createNewReceiveFile();
+    /**
+     * 当接收包是文件时，需要得到一份空的文件用以数据存储
+     *
+     * @param length     长度
+     * @param headerInfo 额外信息
+     * @return 新的文件
+     */
+    protected abstract File createNewReceiveFile(long length, byte[] headerInfo);
 
+    /**
+     * 当接收包是直流数据包时，需要得到一个用以存储当前直流数据的输出流，
+     * 所有接收到的数据都将通过输出流输出
+     *
+     * @param length     长度
+     * @param headerInfo 额外信息
+     * @return 输出流
+     */
+    protected abstract OutputStream createNewReceiveDirectOutputStream(long length, byte[] headerInfo);
+
+    /**
+     * 当收到一个新的包Packet时会进行回调的内部类
+     */
     private ReceiveDispatcher.ReceivePacketCallback receivePacketCallback = new ReceiveDispatcher.ReceivePacketCallback() {
         @Override
-        public ReceivePacket<?, ?> onArrivedNewPacket(byte type, long length) {
+        public ReceivePacket<?, ?> onArrivedNewPacket(byte type, long length, byte[] headerInfo) {
             switch (type) {
                 case Packet.TYPE_MEMORY_BYTES:
                     return new BytesReceivePacket(length);
                 case Packet.TYPE_MEMORY_STRING:
                     return new StringReceivePacket(length);
                 case Packet.TYPE_STREAM_FILE:
-                    return new FileReceivePacket(length, createNewReceiveFile());
+                    return new FileReceivePacket(length, createNewReceiveFile(length, headerInfo));
                 case Packet.TYPE_STREAM_DIRECT:
-                    return new BytesReceivePacket(length);
+                    return new StreamDirectReceivePacket(createNewReceiveDirectOutputStream(length, headerInfo), length);
                 default:
                     throw new UnsupportedOperationException("Unsupported packet type:" + type);
             }

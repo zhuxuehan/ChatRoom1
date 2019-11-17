@@ -95,19 +95,22 @@ public class SocketChannelAdapter implements Sender, Receiver, Cloneable {
             lastReadTime = System.currentTimeMillis();
 
             IoArgs.IoArgsEventProcessor processor = receiveIoEventProcessor;
+            if (processor == null) {
+                return;
+            }
             if (args == null) {
                 args = processor.provideIoArgs();
             }
 
             try {
                 if (args == null) {
-                    processor.onConsumeFailed(null, new IOException("ProvideIoArgs is null."));
+                    processor.onConsumeFailed(new IOException("ProvideIoArgs is null."));
                 } else {
                     int count = args.readFrom(channel);
                     if (count == 0) {
                         System.out.println("Current read zero data!");
                     }
-                    if (args.remained()) {
+                    if (args.remained() && args.isNeedConsumeRemaining()) {
                         //再次注册数据发送
                         attach = args;
                         ioProvider.registerInput(channel, this);
@@ -134,6 +137,9 @@ public class SocketChannelAdapter implements Sender, Receiver, Cloneable {
             lastWriteTime = System.currentTimeMillis();
 
             IoArgs.IoArgsEventProcessor processor = sendIoEventProcessor;
+            if (processor == null) {
+                return;
+            }
             if (args == null) {
                 //拿到一份新的args
                 args = processor.provideIoArgs();
@@ -141,13 +147,13 @@ public class SocketChannelAdapter implements Sender, Receiver, Cloneable {
 
             try {
                 if (args == null) {
-                    processor.onConsumeFailed(null, new IOException("ProvideIoArgs is null."));
+                    processor.onConsumeFailed(new IOException("ProvideIoArgs is null."));
                 } else {
                     int count = args.writeTo(channel);
                     if (count == 0) {
                         System.out.println("Current write zero data!");
                     }
-                    if (args.remained()) {
+                    if (args.remained() && args.isNeedConsumeRemaining()) {
                         //再次注册数据发送
                         attach = args;
                         ioProvider.registerOutput(channel, this);

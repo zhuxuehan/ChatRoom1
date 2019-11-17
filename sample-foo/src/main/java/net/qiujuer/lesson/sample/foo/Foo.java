@@ -5,6 +5,25 @@ import java.io.IOException;
 import java.util.UUID;
 
 public class Foo {
+    //绑定stream到命令链接
+    public static final String COMMAND_CONNECTOR_BIND="--m c bind ";
+    //创建对话房间
+    public static final String COMMAND_AUDIO_CREATE_ROOM="--m a create";
+    //加入对话房间
+    public static final String COMMAND_AUDIO_JOIN_ROOM="--m a join ";
+    //离开房间
+    public static final String COMMAND_AUDIO_LEAVE_ROOM="--m a leave";
+
+    //回送服务器上的唯一标识
+    public static final String COMMAND_INFO_NAME="--i server ";
+    //回送语音群名
+    public static final String COMMAND_INFO_AUDIO_ROOM="--i a room ";
+    //回送语音开始
+    public static final String COMMAND_INFO_AUDIO_START="--i a start ";
+    //回送语音结束
+    public static final String COMMAND_INFO_AUDIO_STOP="--i a stop";
+    //回送语音错误
+    public static final String COMMAND_INFO_AUDIO_ERROR="--i a error";
 
     public static final String COMMAND_EXIT = "00bye00";
     public static final String COMMAND_GROUP_JOIN = "--m g join";

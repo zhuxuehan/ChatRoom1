@@ -9,8 +9,26 @@ import java.nio.channels.WritableByteChannel;
 
 @SuppressWarnings("Duplicates")
 public class IoArgs {
-    private int limit = 256;
-    private ByteBuffer buffer = ByteBuffer.allocate(256);
+    // 单次操作最大区间
+    private volatile int limit;
+    // 是否需要消费所有的区间（读取、写入）
+    private final boolean isNeedConsumeRemaining;
+    // Buffer
+    private final ByteBuffer buffer;
+
+    public IoArgs() {
+        this(256);
+    }
+
+    public IoArgs(int size) {
+        this(size, true);
+    }
+
+    public IoArgs(int size, boolean isNeedConsumeRemaining) {
+        this.limit = size;
+        this.isNeedConsumeRemaining = isNeedConsumeRemaining;
+        this.buffer = ByteBuffer.allocate(size);
+    }
 
     /**
      * 从bytes数组进行消费
@@ -122,16 +140,42 @@ public class IoArgs {
         this.limit = Math.min(limit, buffer.capacity());
     }
 
+    /**
+     * 重置最大限制
+     */
+    public void resetLimit() {
+        this.limit = buffer.capacity();
+    }
+
     public int readLength() {
         return buffer.getInt();
     }
 
+    /**
+     * 获取当前的容量
+     *
+     * @return 容量
+     */
     public int capacity() {
         return buffer.capacity();
     }
 
+    /**
+     * 是否还有数据需要消费，或者说是否还有空闲区间需要容纳内容
+     *
+     * @return 还有数据存储或未消费区间
+     */
     public boolean remained() {
         return buffer.remaining() > 0;
+    }
+
+    /**
+     * 是否需要填满 或 完全消费所有数据
+     *
+     * @return 是否
+     */
+    public boolean isNeedConsumeRemaining() {
+        return isNeedConsumeRemaining;
     }
 
     /**
@@ -173,10 +217,9 @@ public class IoArgs {
         /**
          * 消费失败时回调
          *
-         * @param args IoArgs
          * @param e    异常信息
          */
-        void onConsumeFailed(IoArgs args, Exception e);
+        void onConsumeFailed(Exception e);
 
         /**
          * 消费成功
