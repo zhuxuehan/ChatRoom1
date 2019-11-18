@@ -64,7 +64,10 @@ public class SocketChannelAdapter implements Sender, Receiver, Cloneable {
         }
         outputCallback.checkAttachNull();
         // 当前发送的数据附加到回调中
-        return ioProvider.registerOutput(channel, outputCallback);
+//        return ioProvider.registerOutput(channel, outputCallback);
+        outputCallback.run();
+        return true;
+
     }
 
     @Override

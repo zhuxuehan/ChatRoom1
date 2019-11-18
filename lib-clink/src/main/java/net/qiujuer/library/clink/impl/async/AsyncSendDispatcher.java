@@ -109,9 +109,10 @@ public class AsyncSendDispatcher implements SendDispatcher,
             //返回true 当前有数据需要发送
             if (reader.requestTakePacket()) {
                 try {
-                    boolean isRegister = sender.postSendAsync();
-                    if (isRegister) {
-                        isSending.set(true);
+                    isSending.set(true);
+                    boolean isSucceed = sender.postSendAsync();
+                    if (!isSucceed) {
+                        isSending.set(false);
                     }
                 } catch (IOException e) {
                     closeAndNotify();
