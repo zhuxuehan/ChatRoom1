@@ -7,6 +7,7 @@ import net.qiujuer.lesson.sample.foo.handle.ConnectorHandler;
 import net.qiujuer.library.clink.core.Connector;
 import net.qiujuer.library.clink.core.IoContext;
 import net.qiujuer.library.clink.impl.IoSelectorProvider;
+import net.qiujuer.library.clink.impl.IoStealingSelectorProvider;
 import net.qiujuer.library.clink.impl.SchedulerImpl;
 import net.qiujuer.library.clink.utils.CloseUtils;
 
@@ -31,7 +32,8 @@ public class ClientTest {
         }
 
         IoContext.setup()
-                .ioProvider(new IoSelectorProvider())
+//                .ioProvider(new IoSelectorProvider())
+                .ioProvider(new IoStealingSelectorProvider(1))
                 .scheduler(new SchedulerImpl(1))
                 .start();
 

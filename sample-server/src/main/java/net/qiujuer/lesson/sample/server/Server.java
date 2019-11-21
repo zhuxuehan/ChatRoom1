@@ -5,6 +5,7 @@ import net.qiujuer.lesson.sample.foo.FooGui;
 import net.qiujuer.lesson.sample.foo.constants.TCPConstants;
 import net.qiujuer.library.clink.core.IoContext;
 import net.qiujuer.library.clink.impl.IoSelectorProvider;
+import net.qiujuer.library.clink.impl.IoStealingSelectorProvider;
 import net.qiujuer.library.clink.impl.SchedulerImpl;
 
 import java.io.BufferedReader;
@@ -17,7 +18,8 @@ public class Server {
         File cachePath = Foo.getCacheDir("server");
 
         IoContext.setup()
-                .ioProvider(new IoSelectorProvider())
+//                .ioProvider(new IoSelectorProvider())
+                .ioProvider(new IoStealingSelectorProvider(1))
                 .scheduler(new SchedulerImpl(1))
                 .start();
 
