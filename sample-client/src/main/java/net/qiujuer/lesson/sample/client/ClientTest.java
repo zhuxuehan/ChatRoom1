@@ -32,8 +32,8 @@ public class ClientTest {
         }
 
         IoContext.setup()
-//                .ioProvider(new IoSelectorProvider())
-                .ioProvider(new IoStealingSelectorProvider(1))
+                .ioProvider(new IoSelectorProvider())
+                .ioProvider(new IoStealingSelectorProvider(2))
                 .scheduler(new SchedulerImpl(1))
                 .start();
 

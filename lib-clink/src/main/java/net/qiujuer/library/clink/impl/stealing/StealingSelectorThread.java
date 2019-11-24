@@ -33,7 +33,7 @@ public abstract class StealingSelectorThread extends Thread {
 //    private volatile StealingService stealingService;
 
     protected StealingSelectorThread(Selector selector) {
-        super("Stealing_Selector_Thread-");
+        super("Stealing-Selector-Thread-");
         this.selector = selector;
     }
 
@@ -54,8 +54,8 @@ public abstract class StealingSelectorThread extends Thread {
     //取消注册,在队列中添加一份取消注册的任务,并将副本置空
     public void unregister(SocketChannel channel) {
         SelectionKey selectionKey = channel.keyFor(selector);
+        //关闭前使用attach简单判断是否处于队列中
         if (selectionKey != null && selectionKey.attachment() != null) {
-            //关闭前使用attach简单判断是否处于队列中
             selectionKey.attach(null);
             //添加取消操作
             IoTask ioTask = new IoTask(channel, 0, null);
@@ -126,7 +126,6 @@ public abstract class StealingSelectorThread extends Thread {
     @Override
     public final void run() {
         super.run();
-
         final Selector selector = this.selector;
         final LinkedBlockingQueue<IoTask> registerTaskQueue = this.registerTaskQueue;
         final LinkedBlockingQueue<IoTask> readyTaskQueue = this.readyTaskQueue;
@@ -182,7 +181,7 @@ public abstract class StealingSelectorThread extends Thread {
                     iterator.remove();
                 }
 
-                //判断本次是否有dai待执行的任务
+                //判断本次是否有待执行的任务
                 if (!onceReadyTaskCache.isEmpty()) {
                     //加入到总队列中
                     joinTaskQueue(readyTaskQueue, onceReadyTaskCache);
@@ -238,5 +237,15 @@ public abstract class StealingSelectorThread extends Thread {
                 taskForWritable = task;
             }
         }
+    }
+
+    public static void main(String[] args) {
+        System.out.println(Integer.toBinaryString(SelectionKey.OP_READ));
+        System.out.println(Integer.toBinaryString(SelectionKey.OP_WRITE));
+        System.out.println(Integer.toBinaryString(VALID_OPS));
+        System.out.println(Integer.toBinaryString(~VALID_OPS));
+        System.out.println(Integer.toBinaryString(SelectionKey.OP_READ&~VALID_OPS));
+        System.out.println(Integer.toBinaryString(SelectionKey.OP_WRITE&~VALID_OPS));
+
     }
 }
