@@ -21,7 +21,7 @@ public class IoStealingSelectorProvider implements IoProvider {
         IoStealingThread[] threads = new IoStealingThread[poolSize];
         for (int i = 0; i < poolSize; i++) {
             Selector selector = Selector.open();
-            threads[i] = new IoStealingThread("IoProvider-Thread-" + (i + 1), selector);
+            threads[i] = new IoStealingThread("IoStealingThread-Thread-" + (i + 1), selector);
         }
         StealingService stealingService = new StealingService(threads, 10);
         for (IoStealingThread thread : threads) {
