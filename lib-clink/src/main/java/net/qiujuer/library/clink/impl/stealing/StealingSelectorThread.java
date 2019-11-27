@@ -27,19 +27,20 @@ public abstract class StealingSelectorThread extends Thread {
     private final LinkedBlockingQueue<IoTask> registerTaskQueue = new LinkedBlockingQueue<>();
     //单次就绪的任务缓存，随后一次性加入到就绪队列中
     private final List<IoTask> onceReadyTaskCache = new ArrayList<>(200);
-
+    //任务饱和度量
     private final AtomicLong saturatingCapacity = new AtomicLong();
-
-//    private volatile StealingService stealingService;
+    //多线程协同service
+    private volatile StealingService stealingService;
 
     protected StealingSelectorThread(Selector selector) {
         super("Stealing-Selector-Thread-");
         this.selector = selector;
     }
 
-//    public void setStealingService(StealingService stealingService) {
-//        this.stealingService = stealingService;
-//    }
+    //绑定stealingServier
+    public void setStealingService(StealingService stealingService) {
+        this.stealingService = stealingService;
+    }
 
     //channel注册到selector
     public boolean register(SocketChannel channel, int ops, IoProvider.HandleProviderCallback callback) {
@@ -110,9 +111,14 @@ public abstract class StealingSelectorThread extends Thread {
         readyTaskQueue.addAll(onceReadyTaskCache);
     }
 
+    //消费待完成任务
     private void consumeTodoTasks(final LinkedBlockingQueue<IoTask> readyTaskQueue, LinkedBlockingQueue<IoTask> registerTaskQueue) {
+        final AtomicLong saturatingCapacity = this.saturatingCapacity;
+        //循环把任务做完
         IoTask task = readyTaskQueue.poll();
         while (task != null) {
+            //增加饱和度
+            saturatingCapacity.incrementAndGet();
             //做任务
             if (processTask(task)) {
                 // 做完工作后添加待注册的列表
@@ -120,6 +126,18 @@ public abstract class StealingSelectorThread extends Thread {
             }
             //下个任务
             task = readyTaskQueue.poll();
+        }
+        //窃取其他任务
+        final StealingService stealingService = this.stealingService;
+        if (stealingService != null) {
+            task = stealingService.steal(readyTaskQueue);
+            while (task != null) {
+                saturatingCapacity.incrementAndGet();
+                if (processTask(task)) {
+                    registerTaskQueue.offer(task);
+                }
+                task = stealingService.steal(readyTaskQueue);
+            }
         }
     }
 
@@ -214,6 +232,7 @@ public abstract class StealingSelectorThread extends Thread {
         return readyTaskQueue;
     }
 
+    //获取饱和度 -1 已失效
     public long getSaturatingCapacity() {
         if (selector.isOpen()) {
             return saturatingCapacity.get();
