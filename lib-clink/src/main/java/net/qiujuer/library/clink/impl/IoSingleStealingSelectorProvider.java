@@ -15,7 +15,7 @@ import java.nio.channels.SocketChannel;
 public class IoSingleStealingSelectorProvider implements IoProvider {
     private final StealingSelectorThread thread;
 
-    public IoSingleStealingSelectorProvider(int poolSize) throws IOException {
+    public IoSingleStealingSelectorProvider() throws IOException {
         Selector selector = Selector.open();
         thread = new StealingSelectorThread(selector) {
             @Override
